@@ -163,6 +163,9 @@
 
 (package-initialize)
 
+(when (not (package-installed-p 'use-package))
+  (package-install 'use-package))
+
 (require 'use-package)
 
 ;; Add parts of each file's directory to the buffer name if not unique
