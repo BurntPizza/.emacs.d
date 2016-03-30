@@ -1,0 +1,6 @@
+[submodule "customizations/ace-jump-mode"]
+	path = customizations/ace-jump-mode
+	url = https://github.com/winterTTr/ace-jump-mode.git
+[submodule "customizations/helm"]
+	path = customizations/helm
+	url = https://github.com/emacs-helm/helm.git
