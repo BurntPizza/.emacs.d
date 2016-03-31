@@ -334,6 +334,7 @@
  '(custom-safe-themes
    (quote
     ("e9f642ee0dbd5638e40390b8b8eded9743f1426ad1390e7b2e5d3fa04efa2969" "1ce793cf04c7fbb4648c20f079b687ef10d8ee3014422cf67cf08c92fa6dc77c" "9bc6cf0c6a6c4b06b929e8cd9952478fa0924a4c727dacbc80c3949fc0734fb9" "2b2fff94a0e7e4f46d46b6cb072d43005a84460f6f812c5e63e0ec9e23b36ba0" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" default)))
+ '(initial-frame-alist (quote ((vertical-scroll-bars) (fullscreen . maximized))))
  '(org-startup-indented t)
  '(show-paren-mode t))
 (custom-set-faces
