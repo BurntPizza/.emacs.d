@@ -124,9 +124,6 @@
    White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
-(require 'cl-lib)
-(defun rustup-which-rustc (file-name)
-  (trim-string (shell-command-to-string "rustup which rustc")))
 
 
 ;;;;
@@ -223,10 +220,7 @@
     :ensure t
     :pin melpa-stable
     :config
-    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
-    (add-hook 'rust-mode-hook (lambda ()
-                                (flycheck-set-checker-executable
-                                 'rust (rustup-which-rustc buffer-file-name)))))
+    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
   (use-package racer
     :ensure t
     :pin melpa
