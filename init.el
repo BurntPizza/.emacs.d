@@ -104,7 +104,6 @@
   (windmove-default-keybindings 'meta))
 
 
-(add-to-list 'load-path "~/.emacs.d/vendor")
 (add-to-list 'load-path "~/.emacs.d/customizations")
 
 
@@ -124,16 +123,6 @@
   "Remove white spaces in beginning and ending of STRING.
    White space here is any of: space, tab, emacs newline (line feed, ASCII 10)."
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
-
-(defun with-bash (cmd)
-  "Runs cmd in a bash shell."
-  (interactive)
-  (let ((old-shell (symbol-value 'shell-file-name)))
-    (setq shell-file-name "bash")
-    (let ((output (replace-regexp-in-string "\n$" ""
-                                            (shell-command-to-string cmd))))
-      (setq shell-file-name old-shell)
-      output)))
 
 (require 'cl-lib)
 (defun multirust-which-rustc (file-name)
