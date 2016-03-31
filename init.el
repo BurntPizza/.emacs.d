@@ -125,8 +125,8 @@
   (replace-regexp-in-string "\\`[ \t\n]*" "" (replace-regexp-in-string "[ \t\n]*\\'" "" string)))
 
 (require 'cl-lib)
-(defun multirust-which-rustc (file-name)
-  (trim-string (shell-command-to-string "multirust which rustc")))
+(defun rustup-which-rustc (file-name)
+  (trim-string (shell-command-to-string "rustup which rustc")))
 
 
 ;;;;
@@ -219,7 +219,6 @@
   :pin melpa
   :mode ("\\.rs\\'" . rust-mode)
   :config
-  (add-hook 'rust-mode-hook (lambda () (aggressive-indent-mode 0)))
   (use-package flycheck-rust
     :ensure t
     :pin melpa-stable
@@ -227,7 +226,7 @@
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
     (add-hook 'rust-mode-hook (lambda ()
                                 (flycheck-set-checker-executable
-                                 'rust (multirust-which-rustc buffer-file-name)))))
+                                 'rust (rustup-which-rustc buffer-file-name)))))
   (use-package racer
     :ensure t
     :pin melpa
