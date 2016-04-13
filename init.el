@@ -221,6 +221,7 @@
     :pin melpa-stable
     :config
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
   (use-package racer
     :ensure t
     :pin melpa
@@ -303,7 +304,10 @@
 
 (load "helm.el")
 
-
+(add-to-list 'load-path "~/.emacs.d/customizations/markdown-mode")
+(autoload 'markdown-mode "markdown-mode"
+       "Major mode for editing Markdown files" t)
+    (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

@@ -4,3 +4,6 @@
 [submodule "customizations/helm"]
 	path = customizations/helm
 	url = https://github.com/emacs-helm/helm.git
+[submodule "~/.emacs.d/customizations/markdown-mode/"]
+	path = customizations/markdown-mode
+	url = https://github.com/jrblevin/markdown-mode.git
