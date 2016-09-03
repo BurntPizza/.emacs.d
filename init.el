@@ -218,7 +218,7 @@
   :config
   (use-package flycheck-rust
     :ensure t
-    :pin melpa-stable
+    :pin melpa
     :config
     (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
@@ -227,15 +227,12 @@
     :pin melpa
     :config
     (setq racer-cmd "racer")
+    (setq racer-rust-src-path "~/rust-src/rustc-1.11.0/src/")
     (add-hook 'rust-mode-hook #'racer-mode)
-    (add-hook 'racer-mode #'eldoc-mode))
-
-  (use-package rustfmt
-    :ensure t
-    :pin melpa
-    :config
-    (add-hook 'rust-mode-hook #'rustfmt-enable-on-save)
-    (define-key rust-mode-map (kbd "C-c C-f") #'rustfmt-format-buffer)))
+    (add-hook 'racer-mode-hook #'eldoc-mode)
+    (add-hook 'racer-mode-hook #'company-mode)
+    (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+    (setq company-tooltip-align-annotations t)))
 
 (use-package projectile
   :ensure t)
