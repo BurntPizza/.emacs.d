@@ -190,21 +190,21 @@
 (use-package rainbow-delimiters
   :ensure t)
 
-(use-package clojure-mode
-  :ensure t
-  :pin melpa-stable
-  :mode ("\\.clj\\'" . clojure-mode)
-  :config
-  (use-package cider
-    :ensure t
-    :pin melpa-stable)
-  (use-package clojure-mode-extra-font-locking
-    :ensure t
-	:pin melpa-stable)
-  (use-package clj-refactor
-    :pin melpa-stable
-    :ensure t)
-  (load "setup-clojure.el"))
+;; (use-package clojure-mode
+;;   :ensure t
+;;   :pin melpa-stable
+;;   :mode ("\\.clj\\'" . clojure-mode)
+;;   :config
+;;   (use-package cider
+;;     :ensure t
+;;     :pin melpa-stable)
+;;   (use-package clojure-mode-extra-font-locking
+;;     :ensure t
+;; 	:pin melpa-stable)
+;;   (use-package clj-refactor
+;;     :pin melpa-stable
+;;     :ensure t)
+;;   (load "setup-clojure.el"))
 
 (use-package haskell-mode
   :mode ("\\.hs\\'" . haskell-mode)
@@ -227,7 +227,7 @@
     :pin melpa
     :config
     (setq racer-cmd "racer")
-    (setq racer-rust-src-path "~/rust-src/rustc-1.11.0/src/")
+    (setq racer-rust-src-path "~/.multirust/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src")
     (add-hook 'rust-mode-hook #'racer-mode)
     (add-hook 'racer-mode-hook #'eldoc-mode)
     (add-hook 'racer-mode-hook #'company-mode)
@@ -259,7 +259,7 @@
 
 (use-package flycheck
   :ensure t
-  :pin melpa-stable
+  :pin melpa
   :init
   (add-hook 'after-init-hook #'global-flycheck-mode))
 
@@ -268,6 +268,28 @@
   :config
   (setq drag-stuff-modifier 'shift)
   (drag-stuff-global-mode))
+
+(use-package slime
+  :ensure t
+  :init
+  (setq inferior-lisp-program "/usr/local/bin/sbcl")
+  :config
+  (use-package slime-company
+    :pin "melpa"
+    :ensure t
+    :config
+    (slime-company-init))
+  (add-hook 'slime-mode-hook 'rainbow-delimiters-mode-enable)
+  (add-hook 'slime-repl-mode-hook 'enable-paredit-mode)
+  (add-hook 'slime-repl-mode-hook (lambda ()
+                                    (dolist (k paredit-forward-delete-keys)
+                                      (define-key slime-repl-mode-map
+                                        (read-kbd-macro k)
+                                        nil))
+                                    (define-key slime-repl-mode-map
+                                      (read-kbd-macro paredit-backward-delete-key)
+                                      nil)))
+  (slime-setup '(slime-fancy slime-company)))
 
 ;;;;
 ;; Customization
@@ -314,13 +336,15 @@
     ("e9f642ee0dbd5638e40390b8b8eded9743f1426ad1390e7b2e5d3fa04efa2969" "1ce793cf04c7fbb4648c20f079b687ef10d8ee3014422cf67cf08c92fa6dc77c" "9bc6cf0c6a6c4b06b929e8cd9952478fa0924a4c727dacbc80c3949fc0734fb9" "2b2fff94a0e7e4f46d46b6cb072d43005a84460f6f812c5e63e0ec9e23b36ba0" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" default)))
  '(initial-frame-alist (quote ((vertical-scroll-bars) (fullscreen . maximized))))
  '(org-startup-indented t)
- '(show-paren-mode t))
+ '(show-paren-mode t)
+ '(slime-company-completion (quote simple))
+ '(slime-truncate-lines nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "#000000" :foreground "#cfcfcf" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 113 :width normal :foundry "outline" :family "DejaVu Sans Mono"))))
+ '(default ((t (:background "#000000" :foreground "#cfcfcf" :foundry "unknown" :family "Source Code Pro"))))
  '(company-scrollbar-bg ((t (:background "#191919"))))
  '(company-scrollbar-fg ((t (:background "#0c0c0c"))))
  '(company-tooltip ((t (:inherit default :background "#282828"))))
