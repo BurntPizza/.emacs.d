@@ -190,21 +190,21 @@
 (use-package rainbow-delimiters
   :ensure t)
 
-;; (use-package clojure-mode
-;;   :ensure t
-;;   :pin melpa-stable
-;;   :mode ("\\.clj\\'" . clojure-mode)
-;;   :config
-;;   (use-package cider
-;;     :ensure t
-;;     :pin melpa-stable)
-;;   (use-package clojure-mode-extra-font-locking
-;;     :ensure t
-;; 	:pin melpa-stable)
-;;   (use-package clj-refactor
-;;     :pin melpa-stable
-;;     :ensure t)
-;;   (load "setup-clojure.el"))
+(use-package clojure-mode
+  :ensure t
+  :pin melpa-stable
+  :mode ("\\.clj\\'" . clojure-mode)
+  :config
+  (use-package cider
+    :ensure t
+    :pin melpa-stable)
+  (use-package clojure-mode-extra-font-locking
+    :ensure t
+	:pin melpa-stable)
+  (use-package clj-refactor
+    :pin melpa-stable
+    :ensure t)
+  (load "setup-clojure.el"))
 
 (use-package haskell-mode
   :mode ("\\.hs\\'" . haskell-mode)
@@ -267,6 +267,7 @@
   :ensure t
   :config
   (setq drag-stuff-modifier 'shift)
+  (drag-stuff-define-keys)
   (drag-stuff-global-mode))
 
 (use-package slime
@@ -336,6 +337,9 @@
     ("e9f642ee0dbd5638e40390b8b8eded9743f1426ad1390e7b2e5d3fa04efa2969" "1ce793cf04c7fbb4648c20f079b687ef10d8ee3014422cf67cf08c92fa6dc77c" "9bc6cf0c6a6c4b06b929e8cd9952478fa0924a4c727dacbc80c3949fc0734fb9" "2b2fff94a0e7e4f46d46b6cb072d43005a84460f6f812c5e63e0ec9e23b36ba0" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" default)))
  '(initial-frame-alist (quote ((vertical-scroll-bars) (fullscreen . maximized))))
  '(org-startup-indented t)
+ '(package-selected-packages
+   (quote
+    (clj-refactor clojure-mode-extra-font-locking cider racer flycheck-rust slime-company slime drag-stuff flycheck projectile rust-mode rainbow-delimiters paredit magit company smart-tabs-mode use-package)))
  '(show-paren-mode t)
  '(slime-company-completion (quote simple))
  '(slime-truncate-lines nil))
