@@ -1,4 +1,6 @@
 
+;;; -*- lexical-binding: t; -*-
+
 (defconst MILLION 1000000)
 (defconst HUNDRED-MILLION 100000000)
 
@@ -144,7 +146,7 @@
 ;;              '("tromey" . "http://tromey.com/elpa/") t)
 
 ;; Don't need to check every time.
-;; (when (not package-archive-contents) 
+;; (when (not package-archive-contents)
 ;;   (package-refresh-contents))
 
 (package-initialize)
@@ -208,7 +210,7 @@
 
 (use-package haskell-mode
   :mode ("\\.hs\\'" . haskell-mode)
-  :config 
+  :config
   (add-hook 'haskell-mode-hook 'haskell-indentation-mode))
 
 (use-package rust-mode
