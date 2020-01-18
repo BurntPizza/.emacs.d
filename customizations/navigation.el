@@ -24,7 +24,7 @@
 
 
 ;; projectile everywhere!
-(projectile-global-mode)
+;;(projectile-global-mode)
 
 
 

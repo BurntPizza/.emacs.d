@@ -7,3 +7,6 @@
 [submodule "~/.emacs.d/customizations/markdown-mode/"]
 	path = customizations/markdown-mode
 	url = https://github.com/jrblevin/markdown-mode.git
+[submodule "customizations/flycheck"]
+	path = customizations/flycheck
+	url = https://github.com/flycheck/flycheck.git

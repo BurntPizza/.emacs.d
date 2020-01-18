@@ -94,6 +94,8 @@
 ;; that you can always see what's happening.
 (setq eval-expression-print-level nil)
 
+(setq tramp-default-method "ssh")
+
 ;; from 'better-defaults.el'
 ;; Allow clipboard from outside emacs
 (setq x-select-enable-clipboard t
@@ -107,7 +109,7 @@
 
 
 (add-to-list 'load-path "~/.emacs.d/customizations")
-
+(add-to-list 'load-path "~/dev/rust-analyzer/editors/emacs")
 
 (defun get-string-from-file (filePath)
   "Return filePath's file content."
@@ -138,8 +140,8 @@
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
-(add-to-list 'package-archives
-             '("elpa" . "http://elpa.gnu.org/packages/") t)
+;; (add-to-list 'package-archives
+             ;; '("elpa" . "http://elpa.gnu.org/packages/") t)
 ;; (add-to-list 'package-archives
 ;;              '("marmalade" . "http://marmalade-repo.org/packages/") t)
 ;; (add-to-list 'package-archives
@@ -151,10 +153,36 @@
 
 (package-initialize)
 
-(when (not (package-installed-p 'use-package))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
   (package-install 'use-package))
 
 (require 'use-package)
+
+;; Global overrides
+(bind-keys*
+ ("C-<up>" . backward-paragraph)
+ ("C-<down>" . forward-paragraph)
+ ("C-<left>" . left-word)
+ ("C-<right>" . right-word)
+ ("M-S-<right>" . windmove-right)
+ ("M-S-<left>" . windmove-left))
+
+(use-package exec-path-from-shell
+  :pin melpa
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+
+;; (use-package use-package-ensure-system-package
+;;   :ensure t)
+
+(use-package yafolding
+  :ensure t
+  :defer 1
+  :config
+  (add-hook 'prog-mode-hook (lambda () (yafolding-mode))))
 
 ;; Add parts of each file's directory to the buffer name if not unique
 (use-package uniquify
@@ -192,52 +220,94 @@
 (use-package rainbow-delimiters
   :ensure t)
 
-(use-package clojure-mode
-  :ensure t
-  :pin melpa-stable
-  :mode ("\\.clj\\'" . clojure-mode)
-  :config
-  (use-package cider
-    :ensure t
-    :pin melpa-stable)
-  (use-package clojure-mode-extra-font-locking
-    :ensure t
-	:pin melpa-stable)
-  (use-package clj-refactor
-    :pin melpa-stable
-    :ensure t)
-  (load "setup-clojure.el"))
+;; (use-package clojure-mode
+;;   :ensure t
+;;   :pin melpa-stable
+;;   :mode ("\\.clj\\'" . clojure-mode)
+;;   :config
+;;   (use-package cider
+;;     :ensure t
+;;     :pin melpa-stable)
+;;   (use-package clojure-mode-extra-font-locking
+;;     :ensure t
+;; 	:pin melpa-stable)
+;;   (use-package clj-refactor
+;;     :pin melpa-stable
+;;     :ensure t)
+;;   (load "setup-clojure.el"))
 
-(use-package haskell-mode
-  :mode ("\\.hs\\'" . haskell-mode)
-  :config
-  (add-hook 'haskell-mode-hook 'haskell-indentation-mode))
+;; (use-package haskell-mode
+;;   :mode ("\\.hs\\'" . haskell-mode)
+;;   :config
+;;   (add-hook 'haskell-mode-hook 'haskell-indentation-mode))
+
+(use-package origami
+  :ensure t
+  :pin melpa)
+
+(use-package flycheck
+  :ensure t
+  :pin melpa
+  :defer 1
+  :init (global-flycheck-mode))
+
+;; (use-package emacs-lsp
+;;   :ensure t
+;;   :pin melpa)
+
+;; (use-package lsp-ui
+;;   :ensure t
+;;   :config
+;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+;;   (setq lsp-ui-sideline-enable nil
+;;         lsp-ui-doc-enable nil
+;;         lsp-ui-flycheck-enable t
+;;         lsp-ui-imenu-enable t))
 
 (use-package rust-mode
   :ensure t
   :pin melpa
   :mode ("\\.rs\\'" . rust-mode)
   :config
+ (require 'ra-emacs-lsp)
+;;  (add-hook 'rust-mode-hook #'lsp)
+  (add-to-list 'origami-parser-alist '(rust-mode . origami-c-style-parser))
+  (define-key rust-mode-map (kbd "C-c v") #'origami-toggle-node)
+  (define-key rust-mode-map (kbd "C-c u")
+    (lambda ()
+      "Inserts the unimplemented! macro at point."
+      (interactive)
+      (insert "unimplemented!()")))
+  
+  ;; (use-package lsp-mode
+  ;; 	:ensure t
+  ;; 	:pin melpa)
+  
+  ;; (use-package company-lsp
+  ;;   :ensure t
+  ;;   :pin melpa
+  ;;   :config
+  ;;   (push 'company-lsp company-backends))
+
   (use-package flycheck-rust
     :ensure t
     :pin melpa
     :config
-    (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+    (with-eval-after-load 'rust-mode
+      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
 
-  (use-package racer
-    :ensure t
-    :pin melpa
-    :config
-    (setq racer-cmd "racer")
-    (setq racer-rust-src-path "~/.multirust/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src")
-    (add-hook 'rust-mode-hook #'racer-mode)
-    (add-hook 'racer-mode-hook #'eldoc-mode)
-    (add-hook 'racer-mode-hook #'company-mode)
-    (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-    (setq company-tooltip-align-annotations t)))
-
-(use-package projectile
-  :ensure t)
+  ;; (use-package racer
+  ;;   :ensure t
+  ;;   :pin melpa
+  ;;   :config
+  ;;   (setq racer-cmd "racer")
+  ;;   (setq racer-rust-src-path "~/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src")
+  ;;   (add-hook 'rust-mode-hook #'racer-mode)
+  ;;   (add-hook 'racer-mode-hook #'eldoc-mode)
+  ;;   (add-hook 'racer-mode-hook #'company-mode)
+  ;;   (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
+  ;;   (setq company-tooltip-align-annotations t))
+)
 
 (use-package org
   :ensure t
@@ -259,12 +329,6 @@
   (define-key global-map "\C-cb" 'org-iswitchb)
   (setq org-log-done t))
 
-(use-package flycheck
-  :ensure t
-  :pin melpa
-  :init
-  (add-hook 'after-init-hook #'global-flycheck-mode))
-
 (use-package drag-stuff
   :ensure t
   :config
@@ -272,27 +336,101 @@
   (drag-stuff-define-keys)
   (drag-stuff-global-mode))
 
-(use-package slime
+;; (use-package slime
+;;   :ensure t
+;;   :init
+;;   (require 'slime-autoloads)
+;;   (setq inferior-lisp-program "/usr/bin/sbcl")
+;;   :config
+;;   (use-package slime-company
+;;     :pin "melpa"
+;;     :ensure t
+;;     :config
+;;     (slime-company-init))
+;;   (add-hook 'slime-mode-hook 'rainbow-delimiters-mode-enable)
+;;   (add-hook 'slime-repl-mode-hook 'enable-paredit-mode)
+;;   (add-hook 'slime-repl-mode-hook (lambda ()
+;;                                     (dolist (k paredit-forward-delete-keys)
+;;                                       (define-key slime-repl-mode-map
+;;                                         (read-kbd-macro k)
+;;                                         nil))
+;;                                     (define-key slime-repl-mode-map
+;;                                       (read-kbd-macro paredit-backward-delete-key)
+;;                                       nil)))
+;;   (slime-setup '(slime-fancy slime-company)))
+
+(use-package markdown-mode
   :ensure t
-  :init
-  (setq inferior-lisp-program "/usr/local/bin/sbcl")
-  :config
-  (use-package slime-company
-    :pin "melpa"
-    :ensure t
-    :config
-    (slime-company-init))
-  (add-hook 'slime-mode-hook 'rainbow-delimiters-mode-enable)
-  (add-hook 'slime-repl-mode-hook 'enable-paredit-mode)
-  (add-hook 'slime-repl-mode-hook (lambda ()
-                                    (dolist (k paredit-forward-delete-keys)
-                                      (define-key slime-repl-mode-map
-                                        (read-kbd-macro k)
-                                        nil))
-                                    (define-key slime-repl-mode-map
-                                      (read-kbd-macro paredit-backward-delete-key)
-                                      nil)))
-  (slime-setup '(slime-fancy slime-company)))
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(blink-cursor-mode nil)
+ '(coffee-tab-width 2)
+ '(custom-enabled-themes (quote (tomorrow-night-bright)))
+ '(custom-safe-themes
+   (quote
+    ("e9f642ee0dbd5638e40390b8b8eded9743f1426ad1390e7b2e5d3fa04efa2969" "1ce793cf04c7fbb4648c20f079b687ef10d8ee3014422cf67cf08c92fa6dc77c" "9bc6cf0c6a6c4b06b929e8cd9952478fa0924a4c727dacbc80c3949fc0734fb9" "2b2fff94a0e7e4f46d46b6cb072d43005a84460f6f812c5e63e0ec9e23b36ba0" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" default)))
+ '(elpy-modules
+   (quote
+    (elpy-module-company elpy-module-eldoc elpy-module-pyvenv elpy-module-yasnippet elpy-module-django elpy-module-sane-defaults)))
+ '(initial-frame-alist (quote ((vertical-scroll-bars) (fullscreen . maximized))))
+ '(org-startup-indented t)
+ '(package-selected-packages
+   (quote
+    (racer rust-mode emacs-lsp company-lsp rustic flycheck-rust exec-path-from-shell origami yafolding py-auto-pep8 auto-pep8 clj-refactor drag-stuff rainbow-delimiters paredit magit company smart-tabs-mode use-package)))
+ '(show-paren-mode t)
+ '(slime-company-completion (quote simple))
+ '(slime-truncate-lines nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:background "#000000" :foreground "#cfcfcf" :foundry "unknown" :family "Source Code Pro"))))
+ '(company-scrollbar-bg ((t (:background "#191919"))))
+ '(company-scrollbar-fg ((t (:background "#0c0c0c"))))
+ '(company-tooltip ((t (:inherit default :background "#282828"))))
+ '(company-tooltip-annotation-selection ((t (:inherit company-tooltip-annotation :background "gray30"))))
+ '(company-tooltip-common ((t (:inherit font-lock-constant-face))))
+ '(company-tooltip-common-selection ((t (:inherit company-tooltip-common :background "gray30"))))
+ '(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
+ '(font-lock-string-face ((t (:foreground "DarkOliveGreen3"))))
+ '(font-lock-type-face ((t (:foreground "#e4b474"))))
+ '(font-lock-variable-name-face ((t (:foreground "tan1"))))
+ '(helm-buffer-file ((t (:foreground "gray" :underline t))))
+ '(helm-candidate-number ((t (:background "gray25" :foreground "gray"))))
+ '(helm-ff-file ((t (:foreground "light gray" :underline t))))
+ '(helm-prefarg ((t (:foreground "sea green"))))
+ '(helm-selection ((t (:background "SteelBlue4" :distant-foreground "black"))))
+ '(helm-source-header ((t (:background "gray14" :foreground "white" :weight normal :height 1.1 :family "DejaVu Sans Mono")))))
+
+
+;; scroll two lines at a time (less "jumpy" than defaults)
+(setq mouse-wheel-scroll-amount '(2 ((shift) . 1)))
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+
+;; spellchecking
+(global-set-key (kbd "<f8>") 'ispell-word)
+(global-set-key (kbd "C-S-<f8>") 'flyspell-mode)
+(global-set-key (kbd "C-M-<f8>") 'flyspell-buffer)
+(global-set-key (kbd "C-<f8>") 'flyspell-check-previous-highlighted-word)
+
+(defun flyspell-check-next-highlighted-word ()
+  "Custom function to spell check next highlighted word"
+  (interactive)
+  (flyspell-goto-next-error)
+  (ispell-word))
+(global-set-key (kbd "M-<f8>") 'flyspell-check-next-highlighted-word)
+
 
 ;;;;
 ;; Customization
@@ -326,68 +464,9 @@
 
 (load "helm.el")
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(blink-cursor-mode nil)
- '(coffee-tab-width 2)
- '(custom-enabled-themes (quote (tomorrow-night-bright)))
- '(custom-safe-themes
-   (quote
-    ("e9f642ee0dbd5638e40390b8b8eded9743f1426ad1390e7b2e5d3fa04efa2969" "1ce793cf04c7fbb4648c20f079b687ef10d8ee3014422cf67cf08c92fa6dc77c" "9bc6cf0c6a6c4b06b929e8cd9952478fa0924a4c727dacbc80c3949fc0734fb9" "2b2fff94a0e7e4f46d46b6cb072d43005a84460f6f812c5e63e0ec9e23b36ba0" "030bed79e98026124afd4ef8038ba7fe064314baf18b58759a5c92b91ec872fb" default)))
- '(initial-frame-alist (quote ((vertical-scroll-bars) (fullscreen . maximized))))
- '(org-startup-indented t)
- '(package-selected-packages
-   (quote
-    (clj-refactor clojure-mode-extra-font-locking cider racer flycheck-rust slime-company slime drag-stuff flycheck projectile rust-mode rainbow-delimiters paredit magit company smart-tabs-mode use-package)))
- '(show-paren-mode t)
- '(slime-company-completion (quote simple))
- '(slime-truncate-lines nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:background "#000000" :foreground "#cfcfcf" :foundry "unknown" :family "Source Code Pro"))))
- '(company-scrollbar-bg ((t (:background "#191919"))))
- '(company-scrollbar-fg ((t (:background "#0c0c0c"))))
- '(company-tooltip ((t (:inherit default :background "#282828"))))
- '(company-tooltip-common ((t (:inherit font-lock-constant-face))))
- '(company-tooltip-selection ((t (:inherit font-lock-function-name-face))))
- '(font-lock-string-face ((t (:foreground "DarkOliveGreen3"))))
- '(font-lock-type-face ((t (:foreground "#e4b474"))))
- '(font-lock-variable-name-face ((t (:foreground "tan1"))))
- '(helm-buffer-file ((t (:foreground "gray" :underline t))))
- '(helm-candidate-number ((t (:background "gray25" :foreground "gray"))))
- '(helm-ff-file ((t (:foreground "light gray" :underline t))))
- '(helm-prefarg ((t (:foreground "sea green"))))
- '(helm-selection ((t (:background "SteelBlue4" :distant-foreground "black"))))
- '(helm-source-header ((t (:background "gray14" :foreground "white" :weight normal :height 1.1 :family "DejaVu Sans Mono")))))
-
-
-;; scroll two lines at a time (less "jumpy" than defaults)
-(setq mouse-wheel-scroll-amount '(2 ((shift) . 1)))
-(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
-
-;; spellchecking
-(global-set-key (kbd "<f8>") 'ispell-word)
-(global-set-key (kbd "C-S-<f8>") 'flyspell-mode)
-(global-set-key (kbd "C-M-<f8>") 'flyspell-buffer)
-(global-set-key (kbd "C-<f8>") 'flyspell-check-previous-highlighted-word)
-
-(defun flyspell-check-next-highlighted-word ()
-  "Custom function to spell check next highlighted word"
-  (interactive)
-  (flyspell-goto-next-error)
-  (ispell-word))
-(global-set-key (kbd "M-<f8>") 'flyspell-check-next-highlighted-word)
-
-
 ;; M-x qrr for y/n prompting regex replace
 (defalias 'qrr 'query-replace-regexp)
+(defalias 'rr 'replace-regexp)
 
 (put 'upcase-region 'disabled nil)
 
